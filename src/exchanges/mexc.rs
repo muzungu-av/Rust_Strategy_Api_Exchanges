@@ -4,6 +4,7 @@ use crate::{
 };
 
 pub struct Mexc {
+    name: String,
     connection: Box<dyn ConnectionStrategy>,
     behavior: Box<dyn BehaviorStrategy>,
 }
@@ -13,7 +14,9 @@ impl Mexc {
         connection: Box<dyn ConnectionStrategy>,
         behavior: Box<dyn BehaviorStrategy>,
     ) -> Self {
+        let name: String = "MEXC".to_string();
         Mexc {
+            name,
             connection,
             behavior,
         }
@@ -25,5 +28,7 @@ impl Mexc {
 
         // Выполнение логики для Mexc
         self.behavior.execute();
+
+        println!("Работаем с {}", self.name)
     }
 }

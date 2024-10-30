@@ -8,7 +8,6 @@ use crate::connection::web_socket_connection::WebSocketConnection;
 
 use crate::exchanges::bybit::Bybit;
 use crate::exchanges::mexc::Mexc;
-
 pub struct ExchangeFactory {
     connection: Option<Box<dyn ConnectionStrategy>>,
     behavior: Option<Box<dyn BehaviorStrategy>>,
@@ -22,23 +21,23 @@ impl ExchangeFactory {
         }
     }
 
-    pub fn with_websocket_connection(mut self) -> Self {
-        self.connection = Some(Box::new(WebSocketConnection));
+    // Метод для выбора стратегии подключения на основе переменной окружения
+    pub fn connection(mut self, api_type: &str) -> Self {
+        self.connection = match api_type {
+            "wss" => Some(Box::new(WebSocketConnection)),
+            "http" => Some(Box::new(HttpConnection)),
+            _ => panic!("Неизвестный тип подключения API"),
+        };
         self
     }
 
-    pub fn with_http_connection(mut self) -> Self {
-        self.connection = Some(Box::new(HttpConnection));
-        self
-    }
-
-    pub fn with_standard_behavior(mut self) -> Self {
-        self.behavior = Some(Box::new(StandardBehavior));
-        self
-    }
-
-    pub fn with_alternative_behavior(mut self) -> Self {
-        self.behavior = Some(Box::new(AlternativeBehavior));
+    // Метод для выбора стратегии поведения на основе переменной окружения
+    pub fn behavior(mut self, behavior_type: &str) -> Self {
+        self.behavior = match behavior_type {
+            "standard" => Some(Box::new(StandardBehavior)),
+            "alternative" => Some(Box::new(AlternativeBehavior)),
+            _ => panic!("Неизвестный тип поведения"),
+        };
         self
     }
 

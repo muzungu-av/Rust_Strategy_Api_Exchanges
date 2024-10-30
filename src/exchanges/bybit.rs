@@ -5,6 +5,7 @@ use crate::{
 
 // Структура для биржи Bybit
 pub struct Bybit {
+    name: String,
     connection: Box<dyn ConnectionStrategy>,
     behavior: Box<dyn BehaviorStrategy>,
 }
@@ -14,7 +15,9 @@ impl Bybit {
         connection: Box<dyn ConnectionStrategy>,
         behavior: Box<dyn BehaviorStrategy>,
     ) -> Self {
+        let name: String = "BYBIT".to_string();
         Bybit {
+            name,
             connection,
             behavior,
         }
@@ -26,5 +29,7 @@ impl Bybit {
 
         // Выполнение логики для Bybit
         self.behavior.execute();
+
+        println!("Работаем с {}", self.name)
     }
 }

@@ -1,5 +1,3 @@
-use super::strategy::ApiStrategy;
-
 use hex;
 use hmac::{Hmac, Mac};
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -9,19 +7,27 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub struct ApiService {
-    strategy: Box<dyn ApiStrategy>,
+pub struct SignatureService {
     api_key: String,
     api_secret: String,
+    client: reqwest::Client,
+    headers: HeaderMap,
 }
 
-impl ApiService {
-    pub fn new(strategy: Box<dyn ApiStrategy>, api_key: String, api_secret: String) -> Self {
-        ApiService {
-            strategy,
+impl SignatureService {
+    pub fn new(api_key: String, api_secret: String) -> Result<Self, Box<dyn Error>> {
+        let client = reqwest::Client::new();
+
+        let mut headers = HeaderMap::new();
+        headers.insert("X-MEXC-APIKEY", HeaderValue::from_str(&api_key)?);
+        headers.insert("Content-Type", HeaderValue::from_static("application/json"));
+
+        Ok(SignatureService {
             api_key,
             api_secret,
-        }
+            client,
+            headers,
+        })
     }
 
     pub fn generate_signature(&self, query_string: &str) -> Result<String, Box<dyn Error>> {
@@ -44,12 +50,13 @@ impl ApiService {
             timestamp, signature
         );
 
-        let mut headers = reqwest::header::HeaderMap::new();
-        headers.insert("X-MEXC-APIKEY", HeaderValue::from_str(&self.api_key)?);
-        headers.insert("Content-Type", HeaderValue::from_static("application/json"));
-
-        let client = reqwest::Client::new();
-        let response = client.get(&url).headers(headers).send().await?;
+        // Используем предопределенные клиент и заголовки
+        let response = self
+            .client
+            .get(&url)
+            .headers(self.headers.clone())
+            .send()
+            .await?;
 
         if response.status().is_success() {
             let json: serde_json::Value = response.json().await?;
@@ -60,8 +67,4 @@ impl ApiService {
             Err(format!("Error from MEXC: {}", error_text).into())
         }
     }
-
-    // pub fn perform_task(&self, data: &str) {
-    //     self.strategy.execute_task(data);
-    // }
 }
