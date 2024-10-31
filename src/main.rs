@@ -5,23 +5,32 @@ mod exchanges {
     pub mod exchange_factory;
     pub mod mexc;
 }
-mod request_state_machine;
+mod request_machine;
 
-use request_state_machine::*;
-use state_machine::StateMachine;
+use std::sync::Arc;
+
+use request_machine::*;
 use tokio::main;
 
-#[main]
+#[tokio::main]
 async fn main() {
-    // Получаем начальное состояние
-    let mut state_machine = StateMachine::new(States::Initial);
-    state_machine.add(States::Initial, Box::new(Initial));
-    state_machine.add(States::FirstRequest, Box::new(FirstRequest));
-    state_machine.add(States::SecondRequest, Box::new(SecondRequest));
-    state_machine.add(States::ThirdRequest, Box::new(ThirdRequest));
-    state_machine.add(States::Success, Box::new(Success));
-    state_machine.add(States::Error, Box::new(Error));
+    let error_handler: Arc<dyn Handler> = Arc::new(ErrorHandler);
+    let success_handler: Arc<dyn Handler> = Arc::new(SuccessHandler);
 
-    // Запуск машины состояний
-    let _ = state_machine.run();
+    let third_request: Arc<dyn Handler> = Arc::new(ThirdRequestHandler::new(
+        Some(success_handler.clone()),
+        error_handler.clone(),
+    ));
+    let second_request: Arc<dyn Handler> = Arc::new(SecondRequestHandler::new(
+        Some(third_request),
+        error_handler.clone(),
+    ));
+    let first_request: Arc<dyn Handler> = Arc::new(FirstRequestHandler::new(
+        Some(second_request),
+        error_handler.clone(),
+    ));
+    let initial: Arc<dyn Handler> = Arc::new(InitialHandler::new(Some(first_request)));
+
+    // Запуск цепочки
+    initial.handle().await;
 }
