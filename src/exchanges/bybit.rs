@@ -1,5 +1,5 @@
 use crate::{
-    behavior::behavior_strategy::BehaviorStrategy,
+    behavior::behavior_strategy::{Behavior, BehaviorStrategy},
     connection::connection_strategy::ConnectionStrategy,
 };
 
@@ -7,14 +7,11 @@ use crate::{
 pub struct Bybit {
     name: String,
     connection: Box<dyn ConnectionStrategy>,
-    behavior: Box<dyn BehaviorStrategy>,
+    behavior: Behavior,
 }
 
 impl Bybit {
-    pub fn new(
-        connection: Box<dyn ConnectionStrategy>,
-        behavior: Box<dyn BehaviorStrategy>,
-    ) -> Self {
+    pub fn new(connection: Box<dyn ConnectionStrategy>, behavior: Behavior) -> Self {
         let name: String = "BYBIT".to_string();
         Bybit {
             name,

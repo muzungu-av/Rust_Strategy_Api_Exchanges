@@ -7,30 +7,26 @@ mod exchanges {
 }
 mod request_machine;
 
-use std::sync::Arc;
-
+use dotenv::dotenv;
+use exchanges::exchange_factory::ExchangeFactory;
 use request_machine::*;
-use tokio::main;
+use std::env;
 
 #[tokio::main]
 async fn main() {
-    let error_handler: Arc<dyn Handler> = Arc::new(ErrorHandler);
-    let success_handler: Arc<dyn Handler> = Arc::new(SuccessHandler);
+    dotenv().ok();
+    let api_type = env::var("API_CONNECTION_TYPE").unwrap_or_else(|_| "unknown".to_string());
+    let acces_key = env::var("ACCES_KEY").unwrap_or_else(|_| "unknown".to_string());
+    let secret_key = env::var("SECRET_KEY").unwrap_or_else(|_| "unknown".to_string());
+    let behavior = env::var("BEHAVIOR").unwrap_or_else(|_| "unknown".to_string());
 
-    let third_request: Arc<dyn Handler> = Arc::new(ThirdRequestHandler::new(
-        Some(success_handler.clone()),
-        error_handler.clone(),
-    ));
-    let second_request: Arc<dyn Handler> = Arc::new(SecondRequestHandler::new(
-        Some(third_request),
-        error_handler.clone(),
-    ));
-    let first_request: Arc<dyn Handler> = Arc::new(FirstRequestHandler::new(
-        Some(second_request),
-        error_handler.clone(),
-    ));
-    let initial: Arc<dyn Handler> = Arc::new(InitialHandler::new(Some(first_request)));
+    println!("ACCES_KEY = {}", acces_key);
+    println!("SECRET_KEY = {}", secret_key);
 
-    // Запуск цепочки
-    initial.handle().await;
+    let mexc = ExchangeFactory::new()
+        .connection(&api_type)
+        .behavior(&behavior)
+        .build_mexc();
+
+    mexc.perform_task().await;
 }
