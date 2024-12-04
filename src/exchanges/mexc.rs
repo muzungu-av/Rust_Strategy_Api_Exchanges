@@ -1,28 +1,19 @@
-use crate::{
-    behavior::behavior_strategy::{Behavior, BehaviorStrategy},
-    connection::connection_strategy::ConnectionStrategy,
-};
+use crate::behavior::behavior_strategy::Behavior;
 
 pub struct Mexc {
     name: String,
-    connection: Box<dyn ConnectionStrategy>,
     behavior: Behavior,
 }
 
 impl Mexc {
-    pub fn new(connection: Box<dyn ConnectionStrategy>, behavior: Behavior) -> Self {
+    pub fn new(behavior: Behavior) -> Self {
         let name: String = "MEXC".to_string();
-        Mexc {
-            name,
-            connection,
-            behavior,
-        }
+        Mexc { name, behavior }
     }
 
     pub async fn perform_task(&self) {
-        // Подключение к Mexc
-        self.connection.connect();
         println!("Работаем с {}", self.name);
+        // "https://api.mexc.com/"
         if let Err(e) = self.behavior.execute().await.await {
             eprintln!("Ошибка при выполнении задачи: {:?}", e);
         }

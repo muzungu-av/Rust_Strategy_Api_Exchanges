@@ -23,10 +23,19 @@ async fn main() {
     println!("ACCES_KEY = {}", acces_key);
     println!("SECRET_KEY = {}", secret_key);
 
-    let mexc = ExchangeFactory::new()
-        .connection(&api_type)
-        .behavior(&behavior)
-        .build_mexc();
+    // let mexc = ExchangeFactory::new()
+    //     .connection(&api_type)
+    //     .behavior(&behavior)
+    //     .build_mexc();
 
+    // mexc.perform_task().await;
+
+    let factory = ExchangeFactory::new()
+        .connection(&api_type)
+        .await
+        .expect("Failed to initialize connection")
+        .behavior(&behavior);
+
+    let mexc = factory.build_mexc();
     mexc.perform_task().await;
 }

@@ -1,32 +1,21 @@
-use crate::{
-    behavior::behavior_strategy::{Behavior, BehaviorStrategy},
-    connection::connection_strategy::ConnectionStrategy,
-};
+// use crate::behavior::behavior_strategy::Behavior;
 
-// Структура для биржи Bybit
-pub struct Bybit {
-    name: String,
-    connection: Box<dyn ConnectionStrategy>,
-    behavior: Behavior,
-}
+// pub struct Bybit {
+//     name: String,
+//     behavior: Behavior,
+// }
 
-impl Bybit {
-    pub fn new(connection: Box<dyn ConnectionStrategy>, behavior: Behavior) -> Self {
-        let name: String = "BYBIT".to_string();
-        Bybit {
-            name,
-            connection,
-            behavior,
-        }
-    }
+// impl Bybit {
+//     pub fn new(behavior: Behavior) -> Self {
+//         let name: String = "BYBIT".to_string();
+//         Bybit { name, behavior }
+//     }
 
-    pub fn perform_task(&self) {
-        // Подключение к Bybit
-        self.connection.connect();
-
-        // Выполнение логики для Bybit
-        self.behavior.execute();
-
-        println!("Работаем с {}", self.name)
-    }
-}
+//     pub async fn perform_task(&self) {
+//         println!("Работаем с {}", self.name);
+//         // "https://api.mexc.com/"
+//         if let Err(e) = self.behavior.execute().await.await {
+//             eprintln!("Ошибка при выполнении задачи: {:?}", e);
+//         }
+//     }
+// }
